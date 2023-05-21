@@ -8,9 +8,5 @@ export function fetchCountries(name) {
         throw new Error(response.status);
       }
       return response.json();
-    })
-    .then(data => data)
-    .catch(error => {
-      throw new Error('Oops, something went wrong!');
     });
 }

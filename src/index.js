@@ -1,7 +1,7 @@
-import './css/styles.css';
 import debounce from 'lodash/debounce';
 import Notiflix from 'notiflix';
 import { fetchCountries } from './fetchCountries.js';
+import './css/styles.css';
 
 const DEBOUNCE_DELAY = 300;
 
@@ -63,7 +63,7 @@ function createCountryListItem(country) {
 }
 
 function showTooManyMatchesMessage() {
-  Notiflix.Notify.warning(
+  Notiflix.Notify.info(
     'Too many matches found. Please enter a more specific name.'
   );
 }
@@ -73,8 +73,8 @@ function renderCountryInfo(country) {
 }
 
 function searchCountries(name) {
-  if (name.trim() === '') {
-    clearCountryListAndInfo();
+  clearCountryListAndInfo();
+  if (name === '') {
     return;
   }
 
@@ -115,14 +115,13 @@ function clearCountryListAndInfo() {
 }
 
 function showErrorMessage() {
-  Notiflix.Notify.failure('Oops, there was an error. Please try again.');
+  Notiflix.Notify.failure('Oops, there is no country with that name');
 }
 
-const debouncedSearch = debounce(function (searchValue) {
-  searchCountries(searchValue);
-}, DEBOUNCE_DELAY);
-
-searchBox.addEventListener('input', function (event) {
-  const searchValue = event.target.value.trim();
-  debouncedSearch(searchValue);
-});
+searchBox.addEventListener(
+  'input',
+  debounce(function (event) {
+    const searchValue = event.target.value.trim();
+    searchCountries(searchValue);
+  }, DEBOUNCE_DELAY)
+);
