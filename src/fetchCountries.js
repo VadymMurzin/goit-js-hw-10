@@ -4,9 +4,9 @@ export function fetchCountries(name) {
 
   return fetch(baseUrl + endpoint)
     .then(response => {
-      if (!response.ok) {
-        throw new Error(response.status);
-      }
+      // if (!response.ok) {
+      //   throw new Error(response.status);
+      // }
       return response.json();
     });
 }

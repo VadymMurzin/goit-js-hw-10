@@ -9,63 +9,38 @@ const searchBox = document.getElementById('search-box');
 const countryList = document.querySelector('.country-list');
 const countryInfo = document.querySelector('.country-info');
 
-function countryListItemTemplate(country) {
-  const { name, flags } = country;
-  return `
-      <li class="list">
-        <img src="${flags.svg}" width="60" height="40" alt="Flag of ${name.common}">
-        <p class="text">${name.common}</p>
-      </li>
-    `;
-}
+const countryListItemTemplate = country => `
+  <li class="list">
+    <img src="${country.flags.svg}" width="60" height="40" alt="Flag of ${country.name.common}">
+    <p class="text">${country.name.common}</p>
+  </li>
+`;
 
-function countryInfoTemplate(country) {
-  const { name, flags, capital, population, languages } = country;
-  const countryName = name.common;
-  const countryLanguages = Object.values(languages).join(', ');
-  return `
-      <div class="country-card">
-        <div class="contry-title-flag">
-            <img src="${flags.svg}" width="80" height="60" alt="Flag of ${countryName}">
-            <h1 class="text">${countryName}</h1>
-        </div>
-        <p>Capital: ${capital}</p>
-        <p>Population: ${population}</p>
-        <p>Languages: ${countryLanguages}</p>
-      </div>
-    `;
-}
+const countryInfoTemplate = country => `
+  <div class="country-card">
+    <div class="contry-title-flag">
+      <img src="${country.flags.svg}" width="80" height="60" alt="Flag of ${country.name.common}">
+      <h1 class="text">${country.name.common}</h1>
+    </div>
+    <p>Capital: ${country.capital}</p>
+    <p>Population: ${country.population}</p>
+    <p>Languages: ${Object.values(country.languages).join(', ')}</p>
+  </div>
+`;
 
 function renderCountryList(countries) {
-  countryList.innerHTML = '';
-  if (countries.length === 0) {
-    return;
-  }
+  countryList.innerHTML = countries.map(country => `<li>${countryListItemTemplate(country)}</li>`).join('');
 
-  if (countries.length > 10) {
-    showTooManyMatchesMessage();
-    return;
-  }
-
-  countries.forEach(function (country) {
-    const listItem = createCountryListItem(country);
-    countryList.appendChild(listItem);
+  const listItems = countryList.querySelectorAll('li');
+  listItems.forEach((listItem, index) => {
+    listItem.addEventListener('click', () => {
+      renderCountryInfo(countries[index]);
+    });
   });
-}
-
-function createCountryListItem(country) {
-  const listItem = document.createElement('li');
-  listItem.innerHTML = countryListItemTemplate(country);
-  listItem.addEventListener('click', function () {
-    renderCountryInfo(country);
-  });
-  return listItem;
 }
 
 function showTooManyMatchesMessage() {
-  Notiflix.Notify.info(
-    'Too many matches found. Please enter a more specific name.'
-  );
+  Notiflix.Notify.info('Too many matches found. Please enter a more specific name.');
 }
 
 function renderCountryInfo(country) {
@@ -79,20 +54,19 @@ function searchCountries(name) {
   }
 
   fetchCountries(name)
-    .then(function (countries) {
+    .then(countries => {
       if (countries.length === 0) {
         clearCountryListAndInfo();
-      } else if (
-        countries.length === 1 &&
-        countries[0].name.common.toLowerCase().startsWith(name.toLowerCase())
-      ) {
+      } else if (countries.length === 1) {
         renderCountryInfo(countries[0]);
+        showTooManyMatchesMessage();
         clearCountryList();
       } else {
-        renderFilteredCountryList(countries, name);
+        renderCountryList(countries);
+        showTooManyMatchesMessage();
       }
     })
-    .catch(function (error) {
+    .catch(error => {
       showErrorMessage();
       console.error(error);
     });
@@ -100,13 +74,6 @@ function searchCountries(name) {
 
 function clearCountryList() {
   countryList.innerHTML = '';
-}
-
-function renderFilteredCountryList(countries, name) {
-  const filteredCountries = countries.filter(country =>
-    country.name.common.toLowerCase().startsWith(name.toLowerCase())
-  );
-  renderCountryList(filteredCountries);
 }
 
 function clearCountryListAndInfo() {
@@ -120,7 +87,7 @@ function showErrorMessage() {
 
 searchBox.addEventListener(
   'input',
-  debounce(function (event) {
+  debounce(event => {
     const searchValue = event.target.value.trim();
     searchCountries(searchValue);
   }, DEBOUNCE_DELAY)
